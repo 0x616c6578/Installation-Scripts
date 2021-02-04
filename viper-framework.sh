@@ -74,6 +74,27 @@ function configure_viper {
     sudo cp $VIPER_PATH/data/viper.conf.sample $VIPER_PATH/data/viper.conf
 }
 
+function environment_setup {
+	# Replaces all *viper* functions
+	sudo apt install python3-virtualenv
+	mkdir ~/Environments
+	virtualenv viper
+	source viper/bin/activate
+	pip3 install psycopg2-binary
+	pip3 install viper-framework
+	git clone https://github.com/viper-framework/viper-web.git
+	pip3 install ./viper-web/
+	rm -rf ./viper-web/
+	git clone https://github.com/viper-framework/viper-modules.git ./viper/lib/python3.8/site-packages/viper/modules
+	cd ./viper/lib/python3.8/site-packages/viper/modules
+	git submodule init
+	git submodule update
+	pip3 install -U -r requirements.txt
+
+    sudo sed -i 's\connection =\connection = postgresql://viper:viper@localhost:5432/viperdb\g' $VIPER_PATH/data/viper.conf.sample
+    sed -i "s\module_path =\module_path = ../\g" ../data/viper.conf.sample
+    cp ../data/viper.conf.sample ../data/viper.conf
+}
 
 
 install_viper_framework
@@ -82,4 +103,3 @@ install_viper_modules
 install_postgres
 configure_postgres
 configure_viper
-viper
